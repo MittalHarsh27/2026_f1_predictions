@@ -5,3 +5,4 @@ __pycache__/
 .DS_Store
 f1_cache/
 fastf1_http_cache.sqlite
+fantasy_prediction/data_snapshots/
