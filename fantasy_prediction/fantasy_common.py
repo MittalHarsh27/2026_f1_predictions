@@ -142,19 +142,27 @@ def score_constructor(d1_quali, d2_quali, d1_race, d2_race):
     return float(pts)
 
 
-def count_transfers(new_drivers, new_constructors, current_drivers, current_constructors):
+def count_transfers(new_drivers, new_constructors, current_drivers, current_constructors,
+                    new_turbo=None, current_turbo=None):
     """
     Number of transfers needed to move from current team to new lineup.
-    Each player/constructor brought IN counts as 1 transfer.
+    Each driver/constructor brought IN counts as 1 transfer.
+    Changing the Turbo Driver (2x chip) also counts as 1 transfer, even if
+    the roster is otherwise unchanged.
     """
     driver_ins      = len(set(new_drivers)      - set(current_drivers))
     constructor_ins = len(set(new_constructors) - set(current_constructors))
-    return driver_ins + constructor_ins
+    turbo_change    = (1 if current_turbo is not None
+                            and new_turbo is not None
+                            and new_turbo != current_turbo
+                       else 0)
+    return driver_ins + constructor_ins + turbo_change
 
 
 def optimize_lineup(drivers_df, constructors_df, use_turbo=True,
                     current_drivers=None, current_constructors=None,
-                    max_free_transfers=None, transfer_penalty=-10):
+                    max_free_transfers=None, transfer_penalty=-10,
+                    current_turbo_driver=None):
     """
     Brute-force optimizer: enumerate all valid driver/constructor combos and
     pick the one with the highest expected points under budget constraints.
@@ -170,6 +178,9 @@ def optimize_lineup(drivers_df, constructors_df, use_turbo=True,
         transfers are counted and a penalty is applied for exceeding
         max_free_transfers (default: each extra transfer = transfer_penalty pts).
         The optimizer finds the best net-points lineup accounting for this cost.
+
+    current_turbo_driver: the Turbo Driver you had last race. Switching to a
+        different Turbo Driver counts as 1 additional transfer.
 
     drivers_df columns:      driver_code, team, price, expected_pts
     constructors_df columns: team, price, expected_pts
@@ -226,6 +237,8 @@ def optimize_lineup(drivers_df, constructors_df, use_turbo=True,
                 transfers = count_transfers(
                     driver_combo, cons_combo,
                     current_drivers, current_constructors,
+                    new_turbo=turbo_d if use_turbo else None,
+                    current_turbo=current_turbo_driver,
                 )
                 extra = max(0, transfers - max_free_transfers)
                 penalty = extra * transfer_penalty   # negative value
