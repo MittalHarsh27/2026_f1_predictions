@@ -23,8 +23,8 @@ from fantasy_common import (
 #                       Only FP1 + Sprint Qualifying grid available at this point.
 #
 # Switch LOCK_MODE to "pre_sprint_lock" if you need to lock before the sprint.
-LOCK_MODE      = "pre_quali_lock"
-REFRESH_FASTF1 = False   # set True to pull live session data from FastF1
+LOCK_MODE      = "pre_sprint_lock"
+REFRESH_FASTF1 = True   # set True to pull live session data from FastF1
 
 RACE_NAME  = "Miami GP"
 RACE_ROUND = 4   # 4th race in this project's scripts (Bahrain & Saudi cancelled)
